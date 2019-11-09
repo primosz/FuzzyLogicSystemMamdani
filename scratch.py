@@ -74,7 +74,7 @@ def updatePlots():
   #  drawPlot(plot, set2)
    # drawPlot(plot, set3)
    # drawPlot(plot, set4)
-
+    plot.legend()
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=3, rowspan=12)
@@ -267,7 +267,7 @@ functionsDropdown = OptionMenu(root, clickedFunction, *functions, command=pickFu
 functionsDropdown.config(width=30)
 functionsDropdown.grid(row=2, column=0, padx=20, pady=20, columnspan=2)
 
-setsListbox = Listbox(root, listvariable=setsNames, selectmode=MULTIPLE, width=20, height=10)
+setsListbox = Listbox(root, listvariable=setsNames, selectmode=EXTENDED, width=20, height=10)
 setsListbox.grid(column=6, row=0,padx=20,pady=20, columnspan=2, rowspan=10)
 setsNamesList = list(setsNames)
 print(setsNames)
@@ -333,7 +333,7 @@ btnExport = Button(root, command=export, text="Export to .CSV")
 btnExport.grid(row=16, column=0)
 
 btnImport = Button(root, command=importCSV, text="Import from .CSV")
-btnImport.grid(row=17, column=0)
+btnImport.grid(row=16, column=1)
 
 fig=Figure(figsize=(14,8), dpi=200)
 #fig.add_subplot(111).plot([VeryCold.data['a'],VeryCold.data['b'],VeryCold.data['c']],[0,1,0])
