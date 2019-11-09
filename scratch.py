@@ -6,6 +6,7 @@ import numpy as np
 import csv
 from datetime import datetime
 from tkinter import messagebox
+from tkinter import filedialog
 
 root= Tk()
 root.title("Fuzzy")
@@ -85,7 +86,7 @@ def drawPlot(figure, fSet):
          if fSet['function']=='Triangle': figure.plot([int(fSet['a']), int(fSet['b']), int(fSet['c'])], [0, 1, 0], label=fSet['name'])
          elif fSet['function']=='Trapeze': figure.plot( [int(fSet['a']), int(fSet['b']), int(fSet['c']), int(fSet['d'])], [0, 1, 1, 0], label=fSet['name'])
          elif fSet['function']=='Gaussian' and  int(fSet['b'])>0:  figure.plot(x_values, gaussian(x_values, int(fSet['a']), int(fSet['b'])), label=fSet['name'])
-    figure.legend()
+   # figure.legend()
 
 def export():
     for i in setsObjects:
@@ -98,10 +99,37 @@ def export():
             wr.writerow(i.data.values())
     messagebox.showinfo("Exported", "Exported sets to file: "+ filename)
 
+def importCSV():
+    global setsObjects
+    global setsNames
+    global setsDropdown
+    setsObjects= []
+    root.filename = filedialog.askopenfilename(initialdir="C:\\Users\Primosz\Documents\repo\fuzzy\Fuzzy", title="Select .CSV file",
+                                               filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
+    with open(root.filename, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            setsObjects.append(Set({"name": row[0], "function" : row[1], "a" : int(row[2]), "b" : int(row[3]), "c" : int(row[4]), "d" : int(row[5])}))
+    setsNames = list(map(lambda x: x.data['name'], setsObjects))
+    print(setsNames)
+    setsListbox.delete(0,'end')
+    for i in list(setsNames):
+        print(i)
+        setsListbox.insert(END, i)
+
+    setsDropdown['menu'].delete(0, 'end')
+    for i in setsNames:
+        setsDropdown['menu'].add_command(label=i, command=lambda x=i: pickSet(x))
+    updatePlots()
+    pickSet(setsObjects[1].data['name'])
+    pickFun(functions[0])
+    messagebox.showinfo("Import successful", "Imported file: "+ root.filename)
 
 
 #dropDowns functions
 def pickSet(value):
+    global setsDropdown
+    clickedSet.set(value)
     PickedSetText.set(value)
 
     foundSet = next((x for x in setsObjects if x.data['name']==value), None)
@@ -163,6 +191,7 @@ def pickFun(value):
 
     updateLegend(value)
     updatePlots()
+
 
 def updateLegend(value):
 
@@ -247,7 +276,7 @@ for i in list(setsNames):
     setsListbox.insert(END, i)
 
 btnUpdate = Button(root, command=updatePlots, text="Update")
-btnUpdate.grid(row=11, column=6)
+btnUpdate.grid(row=8, column=6, columnspan=3)
 
 
 #sliders
@@ -300,16 +329,18 @@ Legend = StringVar()
 legendLabel = Label(root, textvariable=Legend, font=("Helvetica", 12))
 legendLabel.grid(row=11, column = 3, columnspan = 5, rowspan=6)
 
-btn = Button(root, command=export, text="Export to .CSV")
-btn.grid(row=16, column=0)
+btnExport = Button(root, command=export, text="Export to .CSV")
+btnExport.grid(row=16, column=0)
+
+btnImport = Button(root, command=importCSV, text="Import from .CSV")
+btnImport.grid(row=17, column=0)
 
 fig=Figure(figsize=(14,8), dpi=200)
 #fig.add_subplot(111).plot([VeryCold.data['a'],VeryCold.data['b'],VeryCold.data['c']],[0,1,0])
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
 canvas.get_tk_widget().grid(row=0, column=5, rowspan=15, columnspan=5)
-updatePlots()
 pickSet(setsObjects[1].data['name'])
 pickFun(functions[0])
-
+updatePlots()
 root.mainloop()
