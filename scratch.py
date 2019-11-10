@@ -75,7 +75,6 @@ def updatePlots():
 
 def drawPlot(figure, fSet):
     selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
-    print(selectedSets)
     if fSet['name'] in selectedSets:
          if fSet['function']=='Triangle': figure.plot([int(fSet['a']), int(fSet['b']), int(fSet['c'])], [0, 1, 0], label=fSet['name'])
          elif fSet['function']=='Trapeze': figure.plot( [int(fSet['a']), int(fSet['b']), int(fSet['c']), int(fSet['d'])], [0, 1, 1, 0], label=fSet['name'])
@@ -164,7 +163,6 @@ def updateLegend(value):
 def slideAfun(value):
     PickedA.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    print("index")
     print(foundSetIndex)
     setsObjects[foundSetIndex].data['a']=value
     if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
@@ -198,9 +196,27 @@ def slideDfun(value):
     PickedD.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['d'] = value
-
-
     updatePlots()
+
+
+def addSet():
+    global setsObjects
+    global setsNames
+    global setsDropdown
+    if addEntry.get()!='':
+        setsObjects.append(Set(
+            {"name": addEntry.get(), "function": "Triangle", "a": 0, "b": 0, "c": 0, "d": 0}))
+        setsNames = list(map(lambda x: x.data['name'], setsObjects))
+        print(setsNames)
+        setsListbox.delete(0, 'end')
+        for i in list(setsNames):
+            print(i)
+            setsListbox.insert(END, i)
+
+        setsDropdown['menu'].delete(0, 'end')
+        for i in setsNames:
+            setsDropdown['menu'].add_command(label=i, command=lambda x=i: pickSet(x))
+        updatePlots()
 
 
 
@@ -224,7 +240,7 @@ for i in list(setsNames):
     setsListbox.insert(END, i)
 
 btnUpdate = Button(root, command=updatePlots, text="Update")
-btnUpdate.grid(row=8, column=6, columnspan=3)
+btnUpdate.grid(row=7, column=6, columnspan=3)
 
 
 #sliders
@@ -282,6 +298,12 @@ btnExport.grid(row=16, column=0)
 
 btnImport = Button(root, command=importCSV, text="Import from .CSV")
 btnImport.grid(row=16, column=1)
+
+addEntry = Entry(root)
+addEntry.grid(row=2, column=6, columnspan=3)
+
+btnAdd = Button(root, command=addSet, text="Add")
+btnAdd.grid(row=2, column=6, columnspan=3, sticky=E)
 
 fig=Figure(figsize=(14,8), dpi=200)
 canvas = FigureCanvasTkAgg(fig, master=root)
