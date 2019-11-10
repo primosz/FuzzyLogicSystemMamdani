@@ -42,7 +42,6 @@ PickedB = IntVar()
 PickedC = IntVar()
 PickedD = IntVar()
 
-#sets = ["Very cold", "Cold", "Warm", "Hot"]
 clickedSet = StringVar()
 clickedSet.set(setsObjects[0].data['name'])
 
@@ -60,7 +59,6 @@ def updatePlots():
     canvas.get_tk_widget().destroy()
     fig= Figure(figsize=(9, 4), dpi=100)
     plot = fig.add_subplot(111)
-   # plot.plot(linspace(0,40), [0] * 50, 'black')
     plot.set_ylim(ymin=0, ymax=1.1)
     plot.set_xlim(xmin=-5, xmax=40)
     plot.set_xlabel("Temperature")
@@ -70,10 +68,6 @@ def updatePlots():
 
     for i in (setsObjects):
         drawPlot(plot, i.data)
-   # drawPlot(plot, set1)
-  #  drawPlot(plot, set2)
-   # drawPlot(plot, set3)
-   # drawPlot(plot, set4)
     plot.legend()
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
@@ -86,7 +80,6 @@ def drawPlot(figure, fSet):
          if fSet['function']=='Triangle': figure.plot([int(fSet['a']), int(fSet['b']), int(fSet['c'])], [0, 1, 0], label=fSet['name'])
          elif fSet['function']=='Trapeze': figure.plot( [int(fSet['a']), int(fSet['b']), int(fSet['c']), int(fSet['d'])], [0, 1, 1, 0], label=fSet['name'])
          elif fSet['function']=='Gaussian' and  int(fSet['b'])>0:  figure.plot(x_values, gaussian(x_values, int(fSet['a']), int(fSet['b'])), label=fSet['name'])
-   # figure.legend()
 
 def export():
     for i in setsObjects:
@@ -140,42 +133,6 @@ def pickSet(value):
     slideC.set(foundSet.data['c'])
     slideD.set(foundSet.data['d'])
     updateLegend(foundSet.data['function'])
-
-    '''
-
-    if PickedSetText.get()==sets[0]:
-        clickedFunction.set(VeryCold.data['function'])
-        slideA.set(VeryCold.data['a'])
-        slideB.set(VeryCold.data['b'])
-        slideC.set(VeryCold.data['c'])
-        slideD.set(VeryCold.data['d'])
-        updateLegend(VeryCold.data['function'])
-
-    elif PickedSetText.get()==sets[1]:
-        clickedFunction.set(Cold.data['function'])
-        slideA.set(Cold.data['a'])
-        slideB.set(Cold.data['b'])
-        slideC.set(Cold.data['c'])
-        slideD.set(Cold.data['d'])
-        updateLegend(Cold.data['function'])
-
-    elif PickedSetText.get()==sets[2]:
-        clickedFunction.set(Warm.data['function'])
-        slideA.set(Warm.data['a'])
-        slideB.set(Warm.data['b'])
-        slideC.set(Warm.data['c'])
-        slideD.set(Warm.data['d'])
-        updateLegend(Warm.data['function'])
-
-    elif PickedSetText.get()==sets[3]:
-        clickedFunction.set(Hot.data['function'])
-        slideA.set(Hot.data['a'])
-        slideB.set(Hot.data['b'])
-        slideC.set(Hot.data['c'])
-        slideD.set(Hot.data['d'])
-        updateLegend(Hot.data['function'])
-        '''
-
     updatePlots()
 
 def pickFun(value):
@@ -190,12 +147,6 @@ def pickFun(value):
         slideCfun(setsObjects[foundSetIndex].data['b'])
         slideB.config(from_=setsObjects[foundSetIndex].data['a'], tickinterval=2)
         slideBfun(setsObjects[foundSetIndex].data['a'])
-    '''
-    if PickedSetText.get()==sets[0]: VeryCold.data['function'] = value
-    elif PickedSetText.get()==sets[1]: Cold.data['function'] = value
-    elif PickedSetText.get()==sets[2]: Warm.data['function'] = value
-    elif PickedSetText.get()==sets[3]: Hot.data['function'] = value
-    '''
 
     updateLegend(value)
     updatePlots()
@@ -219,12 +170,7 @@ def slideAfun(value):
     if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
         global slideB
         slideB.config(from_=value, tickinterval=2)
-    '''
-    if PickedSetText.get()==sets[0]: VeryCold.data['a'] = value
-    elif PickedSetText.get()==sets[1]: Cold.data['a'] = value
-    elif PickedSetText.get()==sets[2]: Warm.data['a'] = value
-    elif PickedSetText.get()==sets[3]: Hot.data['a'] = value
-    '''
+
     updatePlots()
 
 def slideBfun(value):
@@ -235,12 +181,7 @@ def slideBfun(value):
         global slideC
         slideC.config(from_=value, tickinterval=2)
 
-    '''
-    if PickedSetText.get()==sets[0]: VeryCold.data['b'] = value
-    elif PickedSetText.get()==sets[1]: Cold.data['b'] = value
-    elif PickedSetText.get()==sets[2]: Warm.data['b'] = value
-    elif PickedSetText.get()==sets[3]: Hot.data['b'] = value
-    '''
+
     updatePlots()
 
 def slideCfun(value):
@@ -250,12 +191,7 @@ def slideCfun(value):
     if setsObjects[foundSetIndex].data['function'] == 'Trapeze':
         global slideD
         slideD.config(from_=value, tickinterval=2)
-    '''
-    if PickedSetText.get()==sets[0]: VeryCold.data['c'] = value
-    elif PickedSetText.get()==sets[1]: Cold.data['c'] = value
-    elif PickedSetText.get()==sets[2]: Warm.data['c'] = value
-    elif PickedSetText.get()==sets[3]: Hot.data['c'] = value
-    '''
+
     updatePlots()
 
 def slideDfun(value):
@@ -263,12 +199,7 @@ def slideDfun(value):
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['d'] = value
 
-    '''
-    if PickedSetText.get()==sets[0]: VeryCold.data['d'] = value
-    elif PickedSetText.get()==sets[1]: Cold.data['d'] = value
-    elif PickedSetText.get()==sets[2]: Warm.data['d'] = value
-    elif PickedSetText.get()==sets[3]: Hot.data['d'] = value
-    '''
+
     updatePlots()
 
 
@@ -353,7 +284,6 @@ btnImport = Button(root, command=importCSV, text="Import from .CSV")
 btnImport.grid(row=16, column=1)
 
 fig=Figure(figsize=(14,8), dpi=200)
-#fig.add_subplot(111).plot([VeryCold.data['a'],VeryCold.data['b'],VeryCold.data['c']],[0,1,0])
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
 canvas.get_tk_widget().grid(row=0, column=5, rowspan=15, columnspan=5)
