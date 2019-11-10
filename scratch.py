@@ -182,6 +182,14 @@ def pickFun(value):
     PickedFunText.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if  x.data['name']==PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['function']=value
+    if value != 'Gaussian':
+        global slideD
+        slideD.config(from_=setsObjects[foundSetIndex].data['c'], tickinterval=2)
+        slideDfun(setsObjects[foundSetIndex].data['c'])
+        slideC.config(from_=setsObjects[foundSetIndex].data['b'], tickinterval=2)
+        slideCfun(setsObjects[foundSetIndex].data['b'])
+        slideB.config(from_=setsObjects[foundSetIndex].data['a'], tickinterval=2)
+        slideBfun(setsObjects[foundSetIndex].data['a'])
     '''
     if PickedSetText.get()==sets[0]: VeryCold.data['function'] = value
     elif PickedSetText.get()==sets[1]: Cold.data['function'] = value
@@ -202,12 +210,15 @@ def updateLegend(value):
 
 
 #Sliders functions
-def slideA(value):
+def slideAfun(value):
     PickedA.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     print("index")
     print(foundSetIndex)
     setsObjects[foundSetIndex].data['a']=value
+    if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
+        global slideB
+        slideB.config(from_=value, tickinterval=2)
     '''
     if PickedSetText.get()==sets[0]: VeryCold.data['a'] = value
     elif PickedSetText.get()==sets[1]: Cold.data['a'] = value
@@ -216,10 +227,13 @@ def slideA(value):
     '''
     updatePlots()
 
-def slideB(value):
+def slideBfun(value):
     PickedB.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['b'] = value
+    if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
+        global slideC
+        slideC.config(from_=value, tickinterval=2)
 
     '''
     if PickedSetText.get()==sets[0]: VeryCold.data['b'] = value
@@ -229,10 +243,13 @@ def slideB(value):
     '''
     updatePlots()
 
-def slideC(value):
+def slideCfun(value):
     PickedC.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['c'] = value
+    if setsObjects[foundSetIndex].data['function'] == 'Trapeze':
+        global slideD
+        slideD.config(from_=value, tickinterval=2)
     '''
     if PickedSetText.get()==sets[0]: VeryCold.data['c'] = value
     elif PickedSetText.get()==sets[1]: Cold.data['c'] = value
@@ -241,7 +258,7 @@ def slideC(value):
     '''
     updatePlots()
 
-def slideD(value):
+def slideDfun(value):
     PickedD.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
     setsObjects[foundSetIndex].data['d'] = value
@@ -280,19 +297,19 @@ btnUpdate.grid(row=8, column=6, columnspan=3)
 
 
 #sliders
-slideA = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideA)
+slideA = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideAfun)
 slideA.config(length=300, tickinterval =5)
 slideA.grid(row=3, column=0, padx=20, columnspan=2)
 
-slideB = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideB)
+slideB = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideBfun)
 slideB.config(length=300, tickinterval =5)
 slideB.grid(row=5, column=0, padx=20, columnspan=2)
 
-slideC = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideC)
+slideC = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideCfun)
 slideC.config(length=300, tickinterval =5)
 slideC.grid(row=7, column=0, padx=20, columnspan=2)
 
-slideD = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideD)
+slideD = Scale(root, from_=-5, to=40, orient = HORIZONTAL, command = slideDfun)
 slideD.config(length=300, tickinterval =5)
 slideD.grid(row=9, column=0, padx=20, columnspan=2)
 
