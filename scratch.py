@@ -30,8 +30,6 @@ hotParams = {"name": "hot", "function": "Gaussian", "a": 27, "b": 3, "c": 0, "d"
 paramsObjects = [veryColdParams, coldParams, warmParams, hotParams]
 setsObjectsMap = map(Set, paramsObjects)
 setsObjects = list(setsObjectsMap)
-for i in setsObjects:
-    print(i)
 
 VeryCold = Set(veryColdParams)
 Cold = Set(coldParams)
@@ -49,7 +47,7 @@ clickedSet.set(setsObjects[0].data['name'])
 functions = ["Triangle", "Trapeze", "Gaussian"]
 clickedFunction = StringVar()
 clickedFunction.set(functions[0])
-x_values = np.linspace(-5, 40, 100)
+x_values = np.linspace(-5, 40, 150)
 
 
 # plot functions
@@ -67,7 +65,6 @@ def updatePlots():
     plot.set_xlabel("Temperature")
     plot.set_ylabel("Membership")
     plot.set_xticks(linspace(-5, 40), True)
-
 
     for i in (setsObjects):
         drawPlot(plot, i.data)
@@ -93,14 +90,13 @@ def drawPlot(figure, fSet):
 
 
 def export():
-    for i in setsObjects:
-        print(i.data)
-
     filename = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     with open(filename + ".csv", 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
         for i in setsObjects:
-            wr.writerow(i.data.values())
+            if(i.data['name'] in selectedSets):
+                wr.writerow(i.data.values())
     messagebox.showinfo("Exported", "Exported sets to file: " + filename)
 
 
@@ -119,7 +115,6 @@ def importCSV():
                 {"name": row[0], "function": row[1], "a": int(row[2]), "b": int(row[3]), "c": int(row[4]),
                  "d": int(row[5])}))
     setsNames = list(map(lambda x: x.data['name'], setsObjects))
-    print(setsNames)
     setsListbox.delete(0, 'end')
     for i in list(setsNames):
         print(i)
@@ -163,6 +158,8 @@ def pickFun(value):
         slideCfun(setsObjects[foundSetIndex].data['b'])
         slideB.config(from_=setsObjects[foundSetIndex].data['a'], tickinterval=2)
         slideBfun(setsObjects[foundSetIndex].data['a'])
+    else:
+        slideB.config(from_=0)
 
     updateLegend(value)
     updatePlots()
@@ -186,7 +183,6 @@ def updateLegend(value):
 def slideAfun(value):
     PickedA.set(value)
     foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    print(foundSetIndex)
     setsObjects[foundSetIndex].data['a'] = value
     if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
         global slideB
@@ -232,10 +228,8 @@ def addSet():
         setsObjects.append(Set(
             {"name": addEntry.get(), "function": "Triangle", "a": 0, "b": 0, "c": 0, "d": 0}))
         setsNames = list(map(lambda x: x.data['name'], setsObjects))
-        print(setsNames)
         setsListbox.delete(0, 'end')
         for i in list(setsNames):
-            print(i)
             setsListbox.insert(END, i)
 
         setsDropdown['menu'].delete(0, 'end')
@@ -255,12 +249,10 @@ functionsDropdown = OptionMenu(root, clickedFunction, *functions, command=pickFu
 functionsDropdown.config(width=30)
 functionsDropdown.grid(row=2, column=0, padx=20, pady=20, columnspan=2)
 
-setsListbox = Listbox(root, listvariable=setsNames, selectmode=EXTENDED, width=20, height=10)
+setsListbox = Listbox(root, listvariable=setsNames, selectmode=MULTIPLE, width=20, height=10)
 setsListbox.grid(column=6, row=0, padx=20, pady=20, columnspan=2, rowspan=10)
 setsNamesList = list(setsNames)
-print(setsNames)
 for i in list(setsNames):
-    print(i)
     setsListbox.insert(END, i)
 
 btnUpdate = Button(root, command=updatePlots, text="Update")
