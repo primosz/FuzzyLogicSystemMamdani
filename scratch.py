@@ -68,9 +68,13 @@ def updatePlots():
     plot.set_ylabel("Membership")
     plot.set_xticks(linspace(-5, 40), True)
 
+
     for i in (setsObjects):
         drawPlot(plot, i.data)
-    plot.legend()
+
+    selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
+    if len(selectedSets) > 0:
+        plot.legend()
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=3, rowspan=12)
