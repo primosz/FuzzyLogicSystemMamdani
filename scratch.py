@@ -143,6 +143,7 @@ def pickSet(value):
     slideC.set(foundSet.data['c'])
     slideD.set(foundSet.data['d'])
     updateLegend(foundSet.data['function'])
+    if foundSet.data['function'] == 'Gaussian': slideB.config(from_=0)
     updatePlots()
 
 
