@@ -8,7 +8,7 @@ class Triangle:
         self.c = end
 
     def __call__(self, x):
-        if x <= self.a or x >= self.c:
+        if x < self.a or x > self.c:
             return 0
         elif x == self.b:
             return 1
@@ -26,7 +26,7 @@ class Trapezoid:
         self.d = end
 
     def __call__(self, x):
-        if x <= self.a or x >= self.d:
+        if x < self.a or x > self.d:
             return 0
         elif self.b <= x <= self.c:
             return 1
