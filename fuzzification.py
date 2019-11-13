@@ -43,3 +43,28 @@ class Gaussian:
 
     def __call__(self, x):
         return np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))
+
+
+def test_functions():
+    just_right = Triangle(15, 20, 25)
+    cold = Trapezoid(-20, -20, 10, 15)
+    mild = Gaussian(12, 3)
+    warm = Gaussian(20, 5)
+    hot = Trapezoid(25, 30, 50, 50)
+
+    classes = [just_right, cold, mild, warm, hot]
+
+    temp1 = 18
+    temp2 = 23
+    temp3 = 8
+
+    memberships1 = [x(temp1) for x in classes]
+    memberships2 = [x(temp2) for x in classes]
+    memberships3 = [x(temp3) for x in classes]
+
+    print(memberships1)
+    print(memberships2)
+    print(memberships3)
+
+
+test_functions()
