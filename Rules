@@ -1,0 +1,16 @@
+
+No.	Condition	                                                            Action
+1	  IF temperature=(Very_Cold) AND target=Very_Cold                       THEN	No_Change
+2	  IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
+3	  IF temperature=(Very_Cold) AND target=Cold                            THEN	Heat
+4	  IF temperature=(Cold) AND target=Cold                                 THEN    No_Change
+5	  IF temperature=(Warm OR Hot OR Very_Hot) AND target=Cold              THEN	Cool
+6	  IF temperature=(Cold OR Very_Cold) AND target=Warm                    THEN	Heat
+7	  IF (temperature=Warm) AND (target=Warm)                               THEN	No_Change
+8	  IF temperature=(Hot OR Very_Hot) AND target=Warm                      THEN	Cool
+9	  IF temperature=(Very_Cold OR Cold OR Warm) AND target=Hot             THEN	Heat
+10	  IF temperature=Hot AND target=Hot                                     THEN	No_Change
+11	  IF temperature=Very_Hot AND target=Warm                               THEN	Cool
+12	  IF temperature=(Very_Cold OR Cold OR Warm OR Hot) AND target=Very_Hot THEN	Heat
+13	  IF temperature=Very_Hot AND target=Very_Hot                           THEN	No_Change
+
