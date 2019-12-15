@@ -9,8 +9,8 @@ No.	Condition	                                                            Action
 7	  IF (temperature=Warm) AND (target=Warm)                               THEN	No_Change
 8	  IF temperature=(Hot OR Very_Hot) AND target=Warm                      THEN	Cool
 9	  IF temperature=(Very_Cold OR Cold OR Warm) AND target=Hot             THEN	Heat
-10	IF temperature=Hot AND target=Hot                                     THEN	No_Change
-11	IF temperature=Very_Hot AND target=Warm                               THEN	Cool
-12	IF temperature=(Very_Cold OR Cold OR Warm OR Hot) AND target=Very_Hot THEN	Heat
-13	IF temperature=Very_Hot AND target=Very_Hot                           THEN	No_Change
+10	 IF temperature=Hot AND target=Hot                                     THEN	No_Change
+11	 IF temperature=Very_Hot AND target=Warm                               THEN	Cool
+12	 IF temperature=(Very_Cold OR Cold OR Warm OR Hot) AND target=Very_Hot THEN	Heat
+13	 IF temperature=Very_Hot AND target=Very_Hot                           THEN	No_Change
 
