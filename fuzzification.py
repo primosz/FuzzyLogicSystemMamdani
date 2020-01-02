@@ -59,6 +59,10 @@ class Rule:
         self.target = target
         self.then = then
 
+#to evaluate the rule you need to give parameters:
+# 1 - table with memberships for every function
+# 2 - target temperature memberships for every function
+# rule evaluation returns list with values for [Cool, No_Change, Heat]
     def __call__(self, currentTempMemberships, targetMemberships):
         firedMemberships = []
         for idx, val in enumerate(self.indexes):
