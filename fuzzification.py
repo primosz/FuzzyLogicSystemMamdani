@@ -44,6 +44,40 @@ class Gaussian:
     def __call__(self, x):
         return np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))
 
+# you can create rules by giving parameters:
+# 1 - table with values which temperatures are after IF
+# 2 - what is target temperature (after 'AND')
+# 3 - what is the actions (after 'THEN')
+class Rule:
+    def __init__(self, currentTable, target, then):
+        self.indexes = [0, 0, 0, 0, 0]
+        if "VERY COLD" in currentTable: self.indexes[0] = 1
+        if "COLD" in currentTable: self.indexes[1] = 1
+        if "WARM" in currentTable: self.indexes[2] = 1
+        if "HOT" in currentTable: self.indexes[3] = 1
+        if "VERY HOT" in currentTable: self.indexes[4] = 1
+        self.target = target
+        self.then = then
+
+    def __call__(self, currentTempMemberships, targetMemberships):
+        firedMemberships = []
+        for idx, val in enumerate(self.indexes):
+            if val == 1: firedMemberships.append(currentTempMemberships[idx])
+
+        if self.target == "VERY COLD": targetMemValue = targetMemberships[0]
+        if self.target == "COLD": targetMemValue = targetMemberships[1]
+        if self.target == "WARM": targetMemValue = targetMemberships[2]
+        if self.target == "HOT": targetMemValue = targetMemberships[3]
+        if self.target == "VERY HOT": targetMemValue = targetMemberships[4]
+
+        value = min(max(firedMemberships), targetMemValue)
+        if self.then == "COOL":
+            return [value, 0, 0]
+        elif self.then == "NO CHANGE":
+            return [0, value, 0]
+        elif self.then == "HEAT":
+            return [0, 0, value]
+
 
 # Every rule evaluation returns list with values for [Cool, No_Change, Heat]
 
@@ -113,18 +147,24 @@ def test_functions():
 
     classes = [very_cold, cold, warm, hot, very_hot]
 
-    temp1 = 3
-    temp2 = 3
+    temp1 = 22
+    temp2 = 29
     temp3 = 8
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
     memberships3 = [x(temp3) for x in classes]
 
+    rule1 = Rule(["VERY COLD"], "VERY COLD", "NO CHANGE")
+    rule12 = Rule(["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
+
     print(current)
     print(target)
     print(memberships3)
     print(evaluateRules(current, target))
+    print(rule1(current, target))
+
+    print(rule12(current, target))
 
 
 test_functions()
