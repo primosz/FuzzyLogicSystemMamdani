@@ -101,7 +101,8 @@ def test_functions():
     print(memberships3)
 
     rule1 = Rule(classes, ["VERY COLD"], "VERY COLD", "NO CHANGE")
-    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"], "VERY COLD", "COOL")
+#          IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
+    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"],        "VERY COLD",      "COOL")
     rule3 = Rule(classes, ["VERY COLD"], "COLD", "HEAT")
     rule4 = Rule(classes, ["COLD"], "COLD", "NO CHANGE")
     rule5 = Rule(classes, ["WARM", "HOT", "VERY HOT"], "COLD", "COOL")
