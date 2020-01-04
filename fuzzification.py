@@ -1,5 +1,7 @@
 import numpy as np
+import csv
 
+rules = []
 
 class Triangle:
     def __init__(self, name, start, peak, end, none=0):
@@ -75,7 +77,18 @@ class Rule:
         result = min(max(currentTempsMemberships), targetMembership)
         return {'action': self.then, 'membership': result}
 
+    def __str__(self):
+        current_string = ' or '.join(self.currentTable)
+        return f"If it's {current_string} and target is {self.target} then {self.then}."
 
+
+
+def loadRules(filename, fuzzySets):
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            currentTempslist = list(row[0].split(";"))
+            rules.append(Rule(fuzzySets, currentTempslist, row[1], row[2]))
 
 def test_functions():
     very_cold = Trapezoid("VERY COLD", -20, -20, 5, 10)
@@ -83,8 +96,15 @@ def test_functions():
     warm = Gaussian("WARM", 18, 3)
     hot = Gaussian("HOT", 22, 5)
     very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
-
     classes = [very_cold, cold, warm, hot, very_hot]
+
+    loadRules("rules.csv", classes)
+
+
+    for x in rules:
+        print(x)
+
+
 
     temp1 = 1
     temp2 = 26
@@ -114,6 +134,8 @@ def test_functions():
     rule11 = Rule(classes, ["VERY HOT"], "WARM", "COOL")
     rule12 = Rule(classes, ["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
     rule13 = Rule(classes, ["VERY HOT"], "VERY HOT", "NO CHANGE")
+
+    print(rule12)
 
     print(rule1(temp1, temp2))
     print(rule2(temp1, temp2))
