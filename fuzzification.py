@@ -2,24 +2,28 @@ import numpy as np
 
 
 class Triangle:
-    def __init__(self, start, peak, end, none=0):
+    def __init__(self, name, start, peak, end, none=0):
+        self.name=name
         self.a = start
         self.b = peak
         self.c = end
 
+    def __str__(self):
+        return ' ' + self.name + str(self.a) + str(self.b) + str(self.c)
+
     def __call__(self, x):
         if x < self.a or x > self.c:
-            return 0
+            return {'set': self.name, 'value': 0}
         elif x == self.b:
-            return 1
+            return {'set': self.name, 'value': 1}
         elif x < self.b:
-            return (x - self.a) / (self.b - self.a)
+            return {'set': self.name, 'value': (x - self.a) / (self.b - self.a)}
         elif x > self.b:
-            return 1 - ((x - self.b) / (self.c - self.b))
-
+            return {'set': self.name, 'value': 1 - ((x - self.b) / (self.c - self.b))}
 
 class Trapezoid:
-    def __init__(self, start, peak_first, peak_second, end):
+    def __init__(self, name, start, peak_first, peak_second, end):
+        self.name = name
         self.a = start
         self.b = peak_first
         self.c = peak_second
@@ -27,148 +31,102 @@ class Trapezoid:
 
     def __call__(self, x):
         if x < self.a or x > self.d:
-            return 0
+            return {'set': self.name, 'value': 0}
         elif self.b <= x <= self.c:
-            return 1
+            return {'set': self.name, 'value': 1}
         elif x < self.b:
-            return (x - self.a) / (self.b - self.a)
+            return {'set': self.name, 'value': (x - self.a) / (self.b - self.a)}
         elif x > self.c:
-            return 1 - ((x - self.c) / (self.d - self.c))
+            return {'set': self.name, 'value': 1 - ((x - self.c) / (self.d - self.c))}
 
 
 class Gaussian:
-    def __init__(self, expected_value, sigma, none_1=0, none_2=0):
+    def __init__(self, name, expected_value, sigma, none_1=0, none_2=0):
+        self.name = name
         self.mu = expected_value
         self.sigma = sigma
 
     def __call__(self, x):
-        return np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))
+        return {'set': self.name, 'value':  np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))}
+
 
 # you can create rules by giving parameters:
-# 1 - table with values which temperatures are after IF
-# 2 - what is target temperature (after 'AND')
-# 3 - what is the actions (after 'THEN')
+# 1 - list of fuzze sets objects
+# 2 - list of temperatures in rule
+# 3 - what is target temperature (after 'AND')
+# 4 - what is the actions (after 'THEN')
 class Rule:
-    def __init__(self, currentTable, target, then):
-        self.indexes = [0, 0, 0, 0, 0]
-        if "VERY COLD" in currentTable: self.indexes[0] = 1
-        if "COLD" in currentTable: self.indexes[1] = 1
-        if "WARM" in currentTable: self.indexes[2] = 1
-        if "HOT" in currentTable: self.indexes[3] = 1
-        if "VERY HOT" in currentTable: self.indexes[4] = 1
+    def __init__(self, fuzzySets, currentTable, target, then):
+        self.fuzzySets = fuzzySets
+        self.currentTable = currentTable
         self.target = target
         self.then = then
 
-#to evaluate the rule you need to give parameters:
-# 1 - table with memberships for every function
-# 2 - target temperature memberships for every function
-# rule evaluation returns list with values for [Cool, No_Change, Heat]
-    def __call__(self, currentTempMemberships, targetMemberships):
-        firedMemberships = []
-        for idx, val in enumerate(self.indexes):
-            if val == 1: firedMemberships.append(currentTempMemberships[idx])
+    def __call__(self, currentTemp, targetTemp):
 
-        if self.target == "VERY COLD": targetMemValue = targetMemberships[0]
-        if self.target == "COLD": targetMemValue = targetMemberships[1]
-        if self.target == "WARM": targetMemValue = targetMemberships[2]
-        if self.target == "HOT": targetMemValue = targetMemberships[3]
-        if self.target == "VERY HOT": targetMemValue = targetMemberships[4]
+        currentTempsMemberships=[]
+        for fSet in self.currentTable:
+                foundSet = next((x for x in self.fuzzySets if x.name == fSet), None)
+                currentTempsMemberships.append(foundSet(currentTemp)['value'])
 
-        value = min(max(firedMemberships), targetMemValue)
-        if self.then == "COOL":
-            return [value, 0, 0]
-        elif self.then == "NO CHANGE":
-            return [0, value, 0]
-        elif self.then == "HEAT":
-            return [0, 0, value]
+        foundSet = next((x for x in self.fuzzySets if x.name == self.target), None)
+        targetMembership = foundSet(targetTemp)['value']
 
+        result = min(max(currentTempsMemberships), targetMembership)
+        return {'action': self.then, 'membership': result}
 
-# Every rule evaluation returns list with values for [Cool, No_Change, Heat]
-
-def evaluateRule1(currentTempMemberships, targetMemberships):
-    return [0, min(currentTempMemberships[0], targetMemberships[0]), 0]
-
-def evaluateRule2(currentTempMemberships, targetMemberships):
-    return [min(max(currentTempMemberships[1], currentTempMemberships[2], currentTempMemberships[3], currentTempMemberships[4]), targetMemberships[0]), 0, 0]
-
-def evaluateRule3(currentTempMemberships, targetMemberships):
-    return [0, 0, min(currentTempMemberships[0], targetMemberships[1])]
-
-def evaluateRule4(currentTempMemberships, targetMemberships):
-    return [0,  min(currentTempMemberships[1], targetMemberships[1]), 0]
-
-def evaluateRule5(currentTempMemberships, targetMemberships):
-    return [min(max(currentTempMemberships[2], currentTempMemberships[3], currentTempMemberships[4]), targetMemberships[1]), 0, 0]
-
-def evaluateRule6(currentTempMemberships, targetMemberships):
-    return [0,  0, min(max(currentTempMemberships[0], currentTempMemberships[1]), targetMemberships[2])]
-
-def evaluateRule7(currentTempMemberships, targetMemberships):
-    return [0, min(currentTempMemberships[2], targetMemberships[2]), 0]
-
-def evaluateRule8(currentTempMemberships, targetMemberships):
-    return [min(max(currentTempMemberships[3], currentTempMemberships[4]), targetMemberships[2]), 0, 0]
-
-def evaluateRule9(currentTempMemberships, targetMemberships):
-    return [0, 0, min(max(currentTempMemberships[0], currentTempMemberships[1], currentTempMemberships[2]), targetMemberships[3])]
-
-def evaluateRule10(currentTempMemberships, targetMemberships):
-    return [0,  min(currentTempMemberships[3], targetMemberships[3]), 0]
-
-def evaluateRule11(currentTempMemberships, targetMemberships):
-    return [min(currentTempMemberships[4], targetMemberships[3]), 0, 0]
-
-def evaluateRule12(currentTempMemberships, targetMemberships):
-    return [0, 0, min(max(currentTempMemberships[0], currentTempMemberships[1], currentTempMemberships[2], currentTempMemberships[3]), targetMemberships[4])]
-
-def evaluateRule13(currentTempMemberships, targetMemberships):
-    return [0,  min(currentTempMemberships[4], targetMemberships[4]), 0]
-
-def evaluateRules(currentTempMemberships, targetMemberships):
-    result=[]
-    result.append(evaluateRule1(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule2(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule3(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule4(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule5(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule6(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule7(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule8(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule9(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule10(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule11(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule12(currentTempMemberships, targetMemberships))
-    result.append(evaluateRule13(currentTempMemberships, targetMemberships))
-    return result
 
 
 def test_functions():
-    very_cold = Trapezoid(-20, -20, 10, 15)
-    cold = Triangle(5, 10, 15)
-    warm = Gaussian(18, 3)
-    hot = Gaussian(22, 5)
-    very_hot = Trapezoid(25, 30, 50, 50)
+    very_cold = Trapezoid("VERY COLD", -20, -20, 5, 10)
+    cold = Triangle("COLD", 5, 10, 15)
+    warm = Gaussian("WARM", 18, 3)
+    hot = Gaussian("HOT", 22, 5)
+    very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
 
     classes = [very_cold, cold, warm, hot, very_hot]
 
-    temp1 = 22
-    temp2 = 29
-    temp3 = 8
+    temp1 = 1
+    temp2 = 26
+    temp3 = 30
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
     memberships3 = [x(temp3) for x in classes]
 
-    rule1 = Rule(["VERY COLD"], "VERY COLD", "NO CHANGE")
-    rule12 = Rule(["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
+
 
     print(current)
     print(target)
     print(memberships3)
-    print(evaluateRules(current, target))
-    print(rule1(current, target))
 
-    print(rule12(current, target))
+    rule1 = Rule(classes, ["VERY COLD"], "VERY COLD", "NO CHANGE")
+    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"], "VERY COLD", "COOL")
+    rule3 = Rule(classes, ["VERY COLD"], "COLD", "HEAT")
+    rule4 = Rule(classes, ["COLD"], "COLD", "NO CHANGE")
+    rule5 = Rule(classes, ["WARM", "HOT", "VERY HOT"], "COLD", "COOL")
+    rule6 = Rule(classes, ["COLD", "VERY COLD"], "WARM", "HEAT")
+    rule7 = Rule(classes, ["WARM"], "WARM", "NO CHANGE")
+    rule8 = Rule(classes, ["HOT", "VERY HOT"], "WARM", "COOL")
+    rule9 = Rule(classes, ["VERY COLD", "COLD", "WARM"], "HOT", "HEAT")
+    rule10 = Rule(classes, ["HOT"], "HOT", "NO CHANGE")
+    rule11 = Rule(classes, ["VERY HOT"], "WARM", "COOL")
+    rule12 = Rule(classes, ["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
+    rule13 = Rule(classes, ["VERY HOT"], "VERY HOT", "NO CHANGE")
+
+    print(rule1(temp1, temp2))
+    print(rule2(temp1, temp2))
+    print(rule3(temp1, temp2))
+    print(rule4(temp1, temp2))
+    print(rule5(temp1, temp2))
+    print(rule6(temp1, temp2))
+    print(rule7(temp1, temp2))
+    print(rule8(temp1, temp2))
+    print(rule9(temp1, temp2))
+    print(rule10(temp1, temp2))
+    print(rule11(temp1, temp2))
+    print(rule12(temp1, temp2))
+    print(rule13(temp1, temp2))
 
 
 test_functions()
