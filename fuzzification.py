@@ -1,11 +1,14 @@
+from typing import List
+
 import numpy as np
 import csv
 
 rules = []
 
+
 class Triangle:
     def __init__(self, name, start, peak, end, none=0):
-        self.name=name
+        self.name = name
         self.a = start
         self.b = peak
         self.c = end
@@ -22,6 +25,7 @@ class Triangle:
             return {'set': self.name, 'value': (x - self.a) / (self.b - self.a)}
         elif x > self.b:
             return {'set': self.name, 'value': 1 - ((x - self.b) / (self.c - self.b))}
+
 
 class Trapezoid:
     def __init__(self, name, start, peak_first, peak_second, end):
@@ -49,7 +53,7 @@ class Gaussian:
         self.sigma = sigma
 
     def __call__(self, x):
-        return {'set': self.name, 'value':  np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))}
+        return {'set': self.name, 'value': np.exp(-np.power(x - self.mu, 2.) / (2 * np.power(self.sigma, 2.)))}
 
 
 # you can create rules by giving parameters:
@@ -65,11 +69,10 @@ class Rule:
         self.then = then
 
     def __call__(self, currentTemp, targetTemp):
-
-        currentTempsMemberships=[]
+        currentTempsMemberships = []
         for fSet in self.currentTable:
-                foundSet = next((x for x in self.fuzzySets if x.name == fSet), None)
-                currentTempsMemberships.append(foundSet(currentTemp)['value'])
+            foundSet = next((x for x in self.fuzzySets if x.name == fSet), None)
+            currentTempsMemberships.append(foundSet(currentTemp)['value'])
 
         foundSet = next((x for x in self.fuzzySets if x.name == self.target), None)
         targetMembership = foundSet(targetTemp)['value']
@@ -82,7 +85,6 @@ class Rule:
         return f"If it's {current_string} and target is {self.target} then {self.then}."
 
 
-
 def loadRules(filename, fuzzySets):
     with open(filename, 'r') as f:
         reader = csv.reader(f)
@@ -90,7 +92,22 @@ def loadRules(filename, fuzzySets):
             currentTempslist = list(row[0].split(";"))
             rules.append(Rule(fuzzySets, currentTempslist, row[1], row[2]))
 
+
+def rulesAggregation(rules, outputFuzzySets):
+    result = [0] * 100
+    for set in outputFuzzySets:
+        for i in range(100):
+            if set(i)['value'] > 0:
+                matches = [x['membership'] for x in rules if x['action'] == set.name and x['membership'] > 0]
+                if len(matches)>0:
+                    tmp = set(i)['value']
+                    result[i] = min(max(matches), tmp)
+                    print(result[i])
+    return result
+
+
 def test_functions():
+#fuzzy sets for input
     very_cold = Trapezoid("VERY COLD", -20, -20, 5, 10)
     cold = Triangle("COLD", 5, 10, 15)
     warm = Gaussian("WARM", 18, 3)
@@ -98,31 +115,29 @@ def test_functions():
     very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
     classes = [very_cold, cold, warm, hot, very_hot]
 
-    loadRules("rules.csv", classes)
+#fuzzy sets for output
+    cool = Triangle("COOL", 0, 20, 40)
+    no_change = Triangle("NO CHANGE", 35, 50, 65)
+    heat = Triangle("HEAT", 60, 80, 100)
+    outputFuzzySets = [cool, no_change, heat]
 
+    loadRules("rules.csv", classes)
 
     for x in rules:
         print(x)
 
-
-
     temp1 = 1
-    temp2 = 26
-    temp3 = 30
+    temp2 = 23
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
-    memberships3 = [x(temp3) for x in classes]
-
-
 
     print(current)
     print(target)
-    print(memberships3)
 
     rule1 = Rule(classes, ["VERY COLD"], "VERY COLD", "NO CHANGE")
-#          IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
-    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"],        "VERY COLD",      "COOL")
+    #          IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
+    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"], "VERY COLD", "COOL")
     rule3 = Rule(classes, ["VERY COLD"], "COLD", "HEAT")
     rule4 = Rule(classes, ["COLD"], "COLD", "NO CHANGE")
     rule5 = Rule(classes, ["WARM", "HOT", "VERY HOT"], "COLD", "COOL")
@@ -134,8 +149,6 @@ def test_functions():
     rule11 = Rule(classes, ["VERY HOT"], "WARM", "COOL")
     rule12 = Rule(classes, ["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
     rule13 = Rule(classes, ["VERY HOT"], "VERY HOT", "NO CHANGE")
-
-    print(rule12)
 
     print(rule1(temp1, temp2))
     print(rule2(temp1, temp2))
@@ -150,8 +163,9 @@ def test_functions():
     print(rule11(temp1, temp2))
     print(rule12(temp1, temp2))
     print(rule13(temp1, temp2))
+    evaluatedRules = [rule1(temp1, temp2), rule2(temp1, temp2), rule3(temp1, temp2), rule4(temp1, temp2), rule5(temp1, temp2), rule6(temp1, temp2),
+                      rule7(temp1, temp2), rule8(temp1, temp2), rule9(temp1, temp2), rule10(temp1, temp2), rule11(temp1, temp2), rule12(temp1, temp2), rule13(temp1, temp2)]
+    print(rulesAggregation(evaluatedRules, outputFuzzySets))
 
 
 test_functions()
-
-
