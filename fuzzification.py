@@ -1,5 +1,5 @@
 from typing import List
-
+import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
@@ -94,15 +94,15 @@ def loadRules(filename, fuzzySets):
 
 
 def rulesAggregation(rules, outputFuzzySets):
-    result = [0] * 100
+    result = [0] * 200
     for set in outputFuzzySets:
-        for i in range(100):
+        for i in range(200):
             if set(i)['value'] > 0:
                 matches = [x['membership'] for x in rules if x['action'] == set.name and x['membership'] > 0]
-                if len(matches)>0:
+                if len(matches) > 0:
                     tmp = set(i)['value']
-                    result[i] = min(max(matches), tmp)
-                    print(result[i])
+                    if result[i] < min(max(matches), tmp):
+                     result[i] = min(max(matches), tmp)
     return result
 
 
@@ -116,9 +116,9 @@ def test_functions():
     classes = [very_cold, cold, warm, hot, very_hot]
 
 #fuzzy sets for output
-    cool = Triangle("COOL", 0, 20, 40)
-    no_change = Triangle("NO CHANGE", 35, 50, 65)
-    heat = Triangle("HEAT", 60, 80, 100)
+    cool = Triangle("COOL", 0, 50, 100)
+    no_change = Triangle("NO CHANGE", 50, 100, 150)
+    heat = Triangle("HEAT", 100, 150, 200)
     outputFuzzySets = [cool, no_change, heat]
 
     loadRules("rules.csv", classes)
@@ -126,8 +126,8 @@ def test_functions():
     for x in rules:
         print(x)
 
-    temp1 = 1
-    temp2 = 23
+    temp1 = 7
+    temp2 = 5
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
@@ -166,6 +166,11 @@ def test_functions():
     evaluatedRules = [rule1(temp1, temp2), rule2(temp1, temp2), rule3(temp1, temp2), rule4(temp1, temp2), rule5(temp1, temp2), rule6(temp1, temp2),
                       rule7(temp1, temp2), rule8(temp1, temp2), rule9(temp1, temp2), rule10(temp1, temp2), rule11(temp1, temp2), rule12(temp1, temp2), rule13(temp1, temp2)]
     print(rulesAggregation(evaluatedRules, outputFuzzySets))
+
+    plt.ylim(0, 1)
+    plt.plot(np.linspace(-100, 100, 200), rulesAggregation(evaluatedRules, outputFuzzySets))
+    plt.ylabel('memberships')
+    plt.show()
 
 
 test_functions()
