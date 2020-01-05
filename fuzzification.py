@@ -106,6 +106,17 @@ def rulesAggregation(rules, outputFuzzySets):
     return result
 
 
+def calulcateCentroid(plot):
+    n = len(plot)
+    x = list(range(n))
+    num = 0
+    denum = 0
+    for i in range(n):
+        num += x[i] * plot[i]
+        denum += plot[i]
+    return num / denum
+
+
 def test_functions():
 #fuzzy sets for input
     very_cold = Trapezoid("VERY COLD", -20, -20, 5, 10)
@@ -126,8 +137,8 @@ def test_functions():
     for x in rules:
         print(x)
 
-    temp1 = 7
-    temp2 = 5
+    temp1 = 22
+    temp2 = 24
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
@@ -165,12 +176,24 @@ def test_functions():
     print(rule13(temp1, temp2))
     evaluatedRules = [rule1(temp1, temp2), rule2(temp1, temp2), rule3(temp1, temp2), rule4(temp1, temp2), rule5(temp1, temp2), rule6(temp1, temp2),
                       rule7(temp1, temp2), rule8(temp1, temp2), rule9(temp1, temp2), rule10(temp1, temp2), rule11(temp1, temp2), rule12(temp1, temp2), rule13(temp1, temp2)]
-    print(rulesAggregation(evaluatedRules, outputFuzzySets))
+
+    aggregatedRules = rulesAggregation(evaluatedRules, outputFuzzySets)
+    centroid = calulcateCentroid(aggregatedRules)
+    print(f'Centre of gravity: {centroid}')
 
     plt.ylim(0, 1)
-    plt.plot(np.linspace(-100, 100, 200), rulesAggregation(evaluatedRules, outputFuzzySets))
+    for x in outputFuzzySets:
+        plt.plot(np.linspace(0, 200, 200), [x(i)['value'] for i in range(0, 200)], '--', label=x.name, linewidth='0.5')
+
+
+    plt.fill_between(np.linspace(0, 200, 200), aggregatedRules)
+    plt.plot(np.linspace(0, 200, 200), aggregatedRules, label="Output membership", fillstyle='full')
+    plt.axvline(x=centroid, label=f'Centroid: {centroid}', color='black')
+
     plt.ylabel('memberships')
+    plt.legend()
     plt.show()
+
 
 
 test_functions()
