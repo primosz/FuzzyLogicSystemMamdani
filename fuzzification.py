@@ -105,7 +105,7 @@ def rulesAggregation(rules, outputFuzzySets):
                      result[i] = min(max(matches), tmp)
     return result
 
-
+#defuzzification methods
 def calulcateCentroid(plot):
     n = len(plot)
     x = list(range(n))
@@ -114,12 +114,24 @@ def calulcateCentroid(plot):
     for i in range(n):
         num += x[i] * plot[i]
         denum += plot[i]
-    return num / denum
+    return {'name': 'Centroid', 'value': num / denum}
 
 
-def drawFinalPlot(outputFuzzySets, aggregatedRules, point):
 
-    print(f'Final result: {point}')
+def maxMembershipPrinciple(plot):
+    n = len(plot)
+    maxMem = 0
+    x = list(range(n))
+    for i in range(n):
+        if plot[i] > maxMem:
+            maxMem = plot[i]
+            result = x[i]
+    return {'name': 'Max Membership Principle', 'value': result}
+
+
+
+def drawFinalPlot(outputFuzzySets, aggregatedRules, points):
+
     plt.figure(figsize=(12,6))
     plt.ylim(0, 1)
     for x in outputFuzzySets:
@@ -127,7 +139,8 @@ def drawFinalPlot(outputFuzzySets, aggregatedRules, point):
 
     plt.fill_between(np.linspace(0, 200, 200), aggregatedRules)
     plt.plot(np.linspace(0, 200, 200), aggregatedRules, label="Output membership", fillstyle='full')
-    plt.axvline(x=point, label=f'Centroid: {point}', color='black')
+    for point in points:
+        plt.axvline(x=point['value'], label=f'{point["name"]}: {point["value"]}', color='black')
 
     plt.ylabel('memberships')
     plt.legend()
@@ -154,7 +167,7 @@ def test_functions():
     for x in rules:
         print(x)
 
-    temp1 = 22
+    temp1 = 18
     temp2 = 22
 
     current = [x(temp1) for x in classes]
@@ -197,8 +210,9 @@ def test_functions():
 
     aggregatedRules = rulesAggregation(evaluatedRules, outputFuzzySets)
     centroid = calulcateCentroid(aggregatedRules)
+    maxMembershipPrincipleResult = maxMembershipPrinciple(aggregatedRules)
 
-    drawFinalPlot(outputFuzzySets, aggregatedRules, centroid)
+    drawFinalPlot(outputFuzzySets, aggregatedRules, [centroid, maxMembershipPrincipleResult])
 
 
 
