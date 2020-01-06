@@ -120,7 +120,7 @@ def calulcateCentroid(plot):
 def drawFinalPlot(outputFuzzySets, aggregatedRules, point):
 
     print(f'Final result: {point}')
-
+    plt.figure(figsize=(12,6))
     plt.ylim(0, 1)
     for x in outputFuzzySets:
         plt.plot(np.linspace(0, 200, 200), [x(i)['value'] for i in range(0, 200)], '--', label=x.name, linewidth='0.5')
@@ -155,7 +155,7 @@ def test_functions():
         print(x)
 
     temp1 = 22
-    temp2 = 24
+    temp2 = 22
 
     current = [x(temp1) for x in classes]
     target = [x(temp2) for x in classes]
