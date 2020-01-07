@@ -14,3 +14,18 @@ No.	Condition	                                                            Action
 12	  IF temperature=(Very_Cold OR Cold OR Warm OR Hot) AND target=Very_Hot THEN	Heat
 13	  IF temperature=Very_Hot AND target=Very_Hot                           THEN	No_Change
 
+
+   rule1 = Rule(classes, ["VERY COLD"], "VERY COLD", "NO CHANGE")
+    #          IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
+    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"], "VERY COLD", "COOL")
+    rule3 = Rule(classes, ["VERY COLD"], "COLD", "HEAT")
+    rule4 = Rule(classes, ["COLD"], "COLD", "NO CHANGE")
+    rule5 = Rule(classes, ["WARM", "HOT", "VERY HOT"], "COLD", "COOL")
+    rule6 = Rule(classes, ["COLD", "VERY COLD"], "WARM", "HEAT")
+    rule7 = Rule(classes, ["WARM"], "WARM", "NO CHANGE")
+    rule8 = Rule(classes, ["HOT", "VERY HOT"], "WARM", "COOL")
+    rule9 = Rule(classes, ["VERY COLD", "COLD", "WARM"], "HOT", "HEAT")
+    rule10 = Rule(classes, ["HOT"], "HOT", "NO CHANGE")
+    rule11 = Rule(classes, ["VERY HOT"], "WARM", "COOL")
+    rule12 = Rule(classes, ["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
+    rule13 = Rule(classes, ["VERY HOT"], "VERY HOT", "NO CHANGE")

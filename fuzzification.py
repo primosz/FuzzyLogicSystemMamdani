@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-rules = []
-
 
 class Triangle:
     def __init__(self, name, start, peak, end, none=0):
@@ -86,11 +84,13 @@ class Rule:
 
 
 def loadRules(filename, fuzzySets):
+    rules = []
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
             currentTempslist = list(row[0].split(";"))
             rules.append(Rule(fuzzySets, currentTempslist, row[1], row[2]))
+        return rules
 
 
 def rulesAggregation(rules, outputFuzzySets):
@@ -162,7 +162,7 @@ def test_functions():
     heat = Triangle("HEAT", 100, 150, 200)
     outputFuzzySets = [cool, no_change, heat]
 
-    loadRules("rules.csv", classes)
+    rules = loadRules("rules.csv", classes)
 
     for x in rules:
         print(x)
@@ -176,36 +176,7 @@ def test_functions():
     print(current)
     print(target)
 
-    rule1 = Rule(classes, ["VERY COLD"], "VERY COLD", "NO CHANGE")
-    #          IF temperature=(Cold OR Warm OR Hot OR Very_Hot) AND target=Very_Cold THEN	Cool
-    rule2 = Rule(classes, ["COLD", "WARM", "HOT", "VERY HOT"], "VERY COLD", "COOL")
-    rule3 = Rule(classes, ["VERY COLD"], "COLD", "HEAT")
-    rule4 = Rule(classes, ["COLD"], "COLD", "NO CHANGE")
-    rule5 = Rule(classes, ["WARM", "HOT", "VERY HOT"], "COLD", "COOL")
-    rule6 = Rule(classes, ["COLD", "VERY COLD"], "WARM", "HEAT")
-    rule7 = Rule(classes, ["WARM"], "WARM", "NO CHANGE")
-    rule8 = Rule(classes, ["HOT", "VERY HOT"], "WARM", "COOL")
-    rule9 = Rule(classes, ["VERY COLD", "COLD", "WARM"], "HOT", "HEAT")
-    rule10 = Rule(classes, ["HOT"], "HOT", "NO CHANGE")
-    rule11 = Rule(classes, ["VERY HOT"], "WARM", "COOL")
-    rule12 = Rule(classes, ["VERY COLD", "COLD", "WARM", "HOT"], "VERY HOT", "HEAT")
-    rule13 = Rule(classes, ["VERY HOT"], "VERY HOT", "NO CHANGE")
-
-    print(rule1(temp1, temp2))
-    print(rule2(temp1, temp2))
-    print(rule3(temp1, temp2))
-    print(rule4(temp1, temp2))
-    print(rule5(temp1, temp2))
-    print(rule6(temp1, temp2))
-    print(rule7(temp1, temp2))
-    print(rule8(temp1, temp2))
-    print(rule9(temp1, temp2))
-    print(rule10(temp1, temp2))
-    print(rule11(temp1, temp2))
-    print(rule12(temp1, temp2))
-    print(rule13(temp1, temp2))
-    evaluatedRules = [rule1(temp1, temp2), rule2(temp1, temp2), rule3(temp1, temp2), rule4(temp1, temp2), rule5(temp1, temp2), rule6(temp1, temp2),
-                      rule7(temp1, temp2), rule8(temp1, temp2), rule9(temp1, temp2), rule10(temp1, temp2), rule11(temp1, temp2), rule12(temp1, temp2), rule13(temp1, temp2)]
+    evaluatedRules = [x(temp1, temp2) for x in rules]
 
 
     aggregatedRules = rulesAggregation(evaluatedRules, outputFuzzySets)
