@@ -83,6 +83,21 @@ class Rule:
         return f"If it's {current_string} and target is {self.target} then {self.then}."
 
 
+def import_sets_from_csv(filename):
+    sets = []
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            tmp = [x.replace("\"", "") for x in row]
+            if tmp[1] == "Triangle":
+                sets.append(Triangle(tmp[0], tmp[2], tmp[3], tmp[4]))
+            elif tmp[1] == "Trapeze":
+                sets.append(Trapezoid(tmp[0], tmp[2], tmp[3], tmp[4], tmp[5]))
+            elif tmp[1] == "Gaussian":
+                sets.append(Gaussian(tmp[0], tmp[2], tmp[3], tmp[4], tmp[5]))
+    return sets
+
+
 def loadRules(filename, fuzzySets):
     rules = []
     with open(filename, 'r') as f:
@@ -184,7 +199,6 @@ def test_functions():
     maxMembershipPrincipleResult = maxMembershipPrinciple(aggregatedRules)
 
     drawFinalPlot(outputFuzzySets, aggregatedRules, [centroid, maxMembershipPrincipleResult])
-
 
 
 test_functions()
