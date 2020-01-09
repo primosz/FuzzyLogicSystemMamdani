@@ -176,7 +176,8 @@ def test_functions():
     cool = Triangle("COOL", 0, 50, 100)
     no_change = Triangle("NO CHANGE", 50, 100, 150)
     heat = Triangle("HEAT", 100, 150, 200)
-    outputFuzzySets = [cool, no_change, heat]
+    outputFuzzySetsB = [cool, no_change, heat]
+    outputFuzzySets = import_sets_from_csv("outputSets.csv")
 
     rules = loadRules("rules.csv", classes)
 
