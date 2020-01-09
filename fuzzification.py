@@ -90,11 +90,11 @@ def import_sets_from_csv(filename):
         for row in reader:
             tmp = [x.replace("\"", "") for x in row]
             if tmp[1] == "Triangle":
-                sets.append(Triangle(tmp[0], tmp[2], tmp[3], tmp[4]))
+                sets.append(Triangle(tmp[0], int(tmp[2]), int(tmp[3]), int(tmp[4])))
             elif tmp[1] == "Trapeze":
-                sets.append(Trapezoid(tmp[0], tmp[2], tmp[3], tmp[4], tmp[5]))
+                sets.append(Trapezoid(tmp[0], int(tmp[2]), int(tmp[3]), int(tmp[4]), int(tmp[5])))
             elif tmp[1] == "Gaussian":
-                sets.append(Gaussian(tmp[0], tmp[2], tmp[3], tmp[4], tmp[5]))
+                sets.append(Gaussian(tmp[0], int(tmp[2]), int(tmp[3])))
     return sets
 
 
@@ -169,7 +169,8 @@ def test_functions():
     warm = Gaussian("WARM", 18, 3)
     hot = Gaussian("HOT", 22, 5)
     very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
-    classes = [very_cold, cold, warm, hot, very_hot]
+    classesB = [very_cold, cold, warm, hot, very_hot]
+    classes = import_sets_from_csv("inputSets.csv")
 
 #fuzzy sets for output
     cool = Triangle("COOL", 0, 50, 100)

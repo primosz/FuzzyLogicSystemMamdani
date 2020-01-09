@@ -1,0 +1,5 @@
+"VERY COLD","Trapeze","-20","-20","5","10"
+"COLD","Triangle","5","10","15"
+"WARM","Gaussian","18","3"
+"HOT","Gaussian","22","5"
+"VERY HOT","Trapeze","25","30","50","50"
