@@ -68,7 +68,7 @@ def updatePlots():
     fig = Figure(figsize=(9, 4), dpi=100)
     plot = fig.add_subplot(111)
     plot.set_ylim(ymin=0, ymax=1.1)
-    plot.set_xlim(xmin=-5, xmax=40)
+    plot.set_xlim(xmin=-20, xmax=50)
     plot.set_xlabel("Temperature")
     plot.set_ylabel("Membership")
     plot.set_xticks(linspace(-5, 40), True)
@@ -494,19 +494,19 @@ btnUpdate = Button(root, command=updatePlots, text="Update")
 btnUpdate.grid(row=7, column=6, columnspan=3)
 
 # sliders
-slideA = Scale(root, from_=-5, to=40, orient=HORIZONTAL, command=slideAfun)
+slideA = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideAfun)
 slideA.config(length=300, tickinterval=5)
 slideA.grid(row=3, column=0, padx=20, columnspan=2)
 
-slideB = Scale(root, from_=-5, to=40, orient=HORIZONTAL, command=slideBfun)
+slideB = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideBfun)
 slideB.config(length=300, tickinterval=5)
 slideB.grid(row=5, column=0, padx=20, columnspan=2)
 
-slideC = Scale(root, from_=-5, to=40, orient=HORIZONTAL, command=slideCfun)
+slideC = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideCfun)
 slideC.config(length=300, tickinterval=5)
 slideC.grid(row=7, column=0, padx=20, columnspan=2)
 
-slideD = Scale(root, from_=-5, to=40, orient=HORIZONTAL, command=slideDfun)
+slideD = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideDfun)
 slideD.config(length=300, tickinterval=5)
 slideD.grid(row=9, column=0, padx=20, columnspan=2)
 
@@ -586,7 +586,7 @@ btnImportOutput.grid(row=1, column=5, padx=5)
 btnImportRules = Button(algorithm_frame, command=importRulesFromCSV, text="Pick rules file")
 btnImportRules.grid(row=1, column=6, padx=5)
 
-btnRun = Button(algorithm_frame, command=run, text="Run Algorithm", bg='red')
+btnRun = Button(algorithm_frame, command=run, text="Run Algorithm", bg='yellow')
 btnRun.grid(row=1, column=8, padx=5)
 
 updatePlots()
