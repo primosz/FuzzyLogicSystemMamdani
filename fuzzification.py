@@ -1,7 +1,7 @@
-from typing import List
+import csv
+
 import matplotlib.pyplot as plt
 import numpy as np
-import csv
 
 
 class Triangle:
@@ -60,22 +60,22 @@ class Gaussian:
 # 3 - what is target temperature (after 'AND')
 # 4 - what is the actions (after 'THEN')
 class Rule:
-    def __init__(self, fuzzySets, currentTable, target, then):
-        self.fuzzySets = fuzzySets
-        self.currentTable = currentTable
+    def __init__(self, fuzzy_sets, current_table, target, then):
+        self.fuzzySets = fuzzy_sets
+        self.currentTable = current_table
         self.target = target
         self.then = then
 
-    def __call__(self, currentTemp, targetTemp):
-        currentTempsMemberships = []
+    def __call__(self, current_temp, target_temp):
+        current_temps_memberships = []
         for fSet in self.currentTable:
-            foundSet = next((x for x in self.fuzzySets if x.name == fSet), None)
-            currentTempsMemberships.append(foundSet(currentTemp)['value'])
+            found_set = next((x for x in self.fuzzySets if x.name == fSet), None)
+            current_temps_memberships.append(found_set(current_temp)['value'])
 
-        foundSet = next((x for x in self.fuzzySets if x.name == self.target), None)
-        targetMembership = foundSet(targetTemp)['value']
+        found_set = next((x for x in self.fuzzySets if x.name == self.target), None)
+        target_membership = found_set(target_temp)['value']
 
-        result = min(max(currentTempsMemberships), targetMembership)
+        result = min(max(current_temps_memberships), target_membership)
         return {'action': self.then, 'membership': result}
 
     def __str__(self):
@@ -98,30 +98,31 @@ def import_sets_from_csv(filename):
     return sets
 
 
-def loadRules(filename, fuzzySets):
+def load_rules(filename, fuzzy_sets):
     rules = []
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
-            currentTempslist = list(row[0].split(";"))
-            rules.append(Rule(fuzzySets, currentTempslist, row[1], row[2]))
+            current_tempslist = list(row[0].split(";"))
+            rules.append(Rule(fuzzy_sets, current_tempslist, row[1], row[2]))
         return rules
 
 
-def rulesAggregation(rules, outputFuzzySets):
+def rules_aggregation(rules, output_fuzzy_sets):
     result = [0] * 200
-    for set in outputFuzzySets:
+    for out_set in output_fuzzy_sets:
         for i in range(200):
-            if set(i)['value'] > 0:
-                matches = [x['membership'] for x in rules if x['action'] == set.name and x['membership'] > 0]
+            if out_set(i)['value'] > 0:
+                matches = [x['membership'] for x in rules if x['action'] == out_set.name and x['membership'] > 0]
                 if len(matches) > 0:
-                    tmp = set(i)['value']
+                    tmp = out_set(i)['value']
                     if result[i] < min(max(matches), tmp):
-                     result[i] = min(max(matches), tmp)
+                        result[i] = min(max(matches), tmp)
     return result
 
-#defuzzification methods
-def calulcateCentroid(plot):
+
+# defuzzification methods
+def calulcate_centroid(plot):
     n = len(plot)
     x = list(range(n))
     num = 0
@@ -132,28 +133,26 @@ def calulcateCentroid(plot):
     return {'name': 'Centroid', 'value': num / denum}
 
 
-
-def maxMembershipPrinciple(plot):
+def max_membership_principle(plot):
     n = len(plot)
-    maxMem = 0
+    max_mem = 0
     x = list(range(n))
+    result = 0
     for i in range(n):
-        if plot[i] > maxMem:
-            maxMem = plot[i]
+        if plot[i] > max_mem:
+            max_mem = plot[i]
             result = x[i]
     return {'name': 'Max Membership Principle', 'value': result}
 
 
-
-def drawFinalPlot(outputFuzzySets, aggregatedRules, points):
-
-    plt.figure(figsize=(12,6))
+def draw_final_plot(output_fuzzy_sets, aggregated_rules, points):
+    plt.figure(figsize=(12, 6))
     plt.ylim(0, 1)
-    for x in outputFuzzySets:
+    for x in output_fuzzy_sets:
         plt.plot(np.linspace(0, 200, 200), [x(i)['value'] for i in range(0, 200)], '--', label=x.name, linewidth='0.5')
 
-    plt.fill_between(np.linspace(0, 200, 200), aggregatedRules)
-    plt.plot(np.linspace(0, 200, 200), aggregatedRules, label="Output membership", fillstyle='full')
+    plt.fill_between(np.linspace(0, 200, 200), aggregated_rules)
+    plt.plot(np.linspace(0, 200, 200), aggregated_rules, label="Output membership", fillstyle='full')
     for point in points:
         plt.axvline(x=point['value'], label=f'{point["name"]}: {point["value"]}', color='black')
 
@@ -163,25 +162,25 @@ def drawFinalPlot(outputFuzzySets, aggregatedRules, points):
 
 
 def test_functions():
-#fuzzy sets for input
+    # fuzzy sets for input
     very_cold = Trapezoid("VERY COLD", -20, -20, 5, 10)
     cold = Triangle("COLD", 5, 10, 15)
     warm = Gaussian("WARM", 18, 3)
     hot = Gaussian("HOT", 22, 5)
     very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
-    classesB = [very_cold, cold, warm, hot, very_hot]
+    classes_b = [very_cold, cold, warm, hot, very_hot]
     classes = import_sets_from_csv("inputSetsAdjusted.csv")
 
-#fuzzy sets for output
+    # fuzzy sets for output
     cool = Triangle("COOL", 0, 50, 100)
     no_change = Triangle("NO CHANGE", 50, 100, 150)
     heat = Triangle("HEAT", 100, 150, 200)
-    outputFuzzySetsB = [cool, no_change, heat]
-    outputFuzzySets = import_sets_from_csv("outputSets.csv")
+    output_fuzzy_sets_b = [cool, no_change, heat]
+    output_fuzzy_sets = import_sets_from_csv("outputSets.csv")
 
-    rules = loadRules("rules.csv", classes)
+    rules = load_rules("rules.csv", classes)
 
-    #for x in rules:
+    # for x in rules:
     #    print(x)
 
     temp = 32.0
@@ -193,16 +192,13 @@ def test_functions():
     print(current)
     print(target)
 
-    evaluatedRules = [x(temp, temp_target) for x in rules]
+    evaluated_rules = [x(temp, temp_target) for x in rules]
 
+    aggregated_rules = rules_aggregation(evaluated_rules, output_fuzzy_sets)
+    centroid = calulcate_centroid(aggregated_rules)
+    max_membership_principle_result = max_membership_principle(aggregated_rules)
 
-    aggregatedRules = rulesAggregation(evaluatedRules, outputFuzzySets)
-    centroid = calulcateCentroid(aggregatedRules)
-    maxMembershipPrincipleResult = maxMembershipPrinciple(aggregatedRules)
-
-    #print(f"Target: {temp_target} | Current: {temp} - Centroid: {centroid['value'].round(2)} - MMP: {maxMembershipPrincipleResult['value']}")
-
-    drawFinalPlot(outputFuzzySets, aggregatedRules, [centroid, maxMembershipPrincipleResult])
+    draw_final_plot(output_fuzzy_sets, aggregated_rules, [centroid, max_membership_principle_result])
 
 
 def temperature_simulation(start, target, timesteps, input_sets, output_sets, rules_set, method):
@@ -210,7 +206,7 @@ def temperature_simulation(start, target, timesteps, input_sets, output_sets, ru
 
     output_sets = import_sets_from_csv(output_sets)
 
-    rules = loadRules(rules_set, input_sets)
+    rules = load_rules(rules_set, input_sets)
 
     for _ in range(0, timesteps):
         target = [x(target) for x in input_sets]
@@ -219,13 +215,13 @@ def temperature_simulation(start, target, timesteps, input_sets, output_sets, ru
 
         output = _
 
-        aggregated_rules = rulesAggregation(evaluated_rules, output_sets)
+        aggregated_rules = rules_aggregation(evaluated_rules, output_sets)
         if method is "centroid":
-            output = calulcateCentroid(aggregated_rules)
+            output = calulcate_centroid(aggregated_rules)
         if method is "mmp":
-            output = maxMembershipPrinciple(aggregated_rules)
+            output = max_membership_principle(aggregated_rules)
 
-        start += ((output['value']-100)*2)/1000
+        start += ((output['value'] - 100) * 2) / 1000
 
         print(round(start, 2))
 

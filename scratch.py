@@ -1,14 +1,16 @@
+import csv
+import os
+from datetime import datetime
 from tkinter import *
+from tkinter import filedialog
+from tkinter import messagebox
+
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from matplotlib.figure import Figure
 from numpy import linspace
-import numpy as np
-import csv
-from datetime import datetime
-from tkinter import messagebox
-from tkinter import filedialog
-import matplotlib.pyplot as plt
-import os
+
 root = Tk()
 root.title("Fuzzy")
 root.geometry("1440x800")
@@ -62,7 +64,7 @@ def gaussian(x, mu, sig):
     return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
 
-def updatePlots():
+def update_plots():
     global canvas
     canvas.get_tk_widget().destroy()
     fig = Figure(figsize=(9, 4), dpi=100)
@@ -73,41 +75,41 @@ def updatePlots():
     plot.set_ylabel("Membership")
     plot.set_xticks(linspace(-5, 40), True)
 
-    for i in (setsObjects):
-        drawPlot(plot, i.data)
+    for i in setsObjects:
+        draw_plot(plot, i.data)
 
-    selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
-    if len(selectedSets) > 0:
+    selected_sets = [setsListbox.get(i) for i in setsListbox.curselection()]
+    if len(selected_sets) > 0:
         plot.legend()
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=3, rowspan=12)
 
 
-def drawPlot(figure, fSet):
-    selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
-    if fSet['name'] in selectedSets:
-        if fSet['function'] == 'Triangle':
-            figure.plot([int(fSet['a']), int(fSet['b']), int(fSet['c'])], [0, 1, 0], label=fSet['name'])
-        elif fSet['function'] == 'Trapeze':
-            figure.plot([int(fSet['a']), int(fSet['b']), int(fSet['c']), int(fSet['d'])], [0, 1, 1, 0],
-                        label=fSet['name'])
-        elif fSet['function'] == 'Gaussian' and int(fSet['b']) > 0:
-            figure.plot(x_values, gaussian(x_values, int(fSet['a']), int(fSet['b'])), label=fSet['name'])
+def draw_plot(figure, f_set):
+    selected_sets = [setsListbox.get(i) for i in setsListbox.curselection()]
+    if f_set['name'] in selected_sets:
+        if f_set['function'] == 'Triangle':
+            figure.plot([int(f_set['a']), int(f_set['b']), int(f_set['c'])], [0, 1, 0], label=f_set['name'])
+        elif f_set['function'] == 'Trapeze':
+            figure.plot([int(f_set['a']), int(f_set['b']), int(f_set['c']), int(f_set['d'])], [0, 1, 1, 0],
+                        label=f_set['name'])
+        elif f_set['function'] == 'Gaussian' and int(f_set['b']) > 0:
+            figure.plot(x_values, gaussian(x_values, int(f_set['a']), int(f_set['b'])), label=f_set['name'])
 
 
 def export():
     filename = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     with open(filename + ".csv", 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        selectedSets = [setsListbox.get(i) for i in setsListbox.curselection()]
+        selected_sets = [setsListbox.get(i) for i in setsListbox.curselection()]
         for i in setsObjects:
-            if(i.data['name'] in selectedSets):
+            if i.data['name'] in selected_sets:
                 wr.writerow(i.data.values())
     messagebox.showinfo("Exported", "Exported sets to file: " + filename)
 
 
-def importCSV():
+def import_csv():
     global setsObjects
     global setsNames
     global setsDropdown
@@ -129,15 +131,15 @@ def importCSV():
 
     setsDropdown['menu'].delete(0, 'end')
     for i in setsNames:
-        setsDropdown['menu'].add_command(label=i, command=lambda x=i: pickSet(x))
-    updatePlots()
-    pickSet(setsObjects[1].data['name'])
-    pickFun(functions[0])
+        setsDropdown['menu'].add_command(label=i, command=lambda x=i: pick_set(x))
+    update_plots()
+    pick_set(setsObjects[1].data['name'])
+    pick_fun(functions[0])
     messagebox.showinfo("Import successful", "Imported file: " + root.filename)
 
 
 # dropDowns functions
-def pickSet(value):
+def pick_set(value):
     global setsDropdown
     clickedSet.set(value)
     PickedSetText.set(value)
@@ -149,31 +151,31 @@ def pickSet(value):
     slideB.set(foundSet.data['b'])
     slideC.set(foundSet.data['c'])
     slideD.set(foundSet.data['d'])
-    updateLegend(foundSet.data['function'])
+    update_legend(foundSet.data['function'])
     if foundSet.data['function'] == 'Gaussian': slideB.config(from_=0)
-    updatePlots()
+    update_plots()
 
 
-def pickFun(value):
+def pick_fun(value):
     PickedFunText.set(value)
-    foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    setsObjects[foundSetIndex].data['function'] = value
+    found_set_index = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
+    setsObjects[found_set_index].data['function'] = value
     if value != 'Gaussian':
         global slideD
-        slideD.config(from_=setsObjects[foundSetIndex].data['c'], tickinterval=2)
-        slideDfun(setsObjects[foundSetIndex].data['c'])
-        slideC.config(from_=setsObjects[foundSetIndex].data['b'], tickinterval=2)
-        slideCfun(setsObjects[foundSetIndex].data['b'])
-        slideB.config(from_=setsObjects[foundSetIndex].data['a'], tickinterval=2)
-        slideBfun(setsObjects[foundSetIndex].data['a'])
+        slideD.config(from_=setsObjects[found_set_index].data['c'], tickinterval=2)
+        slide_d_fun(setsObjects[found_set_index].data['c'])
+        slideC.config(from_=setsObjects[found_set_index].data['b'], tickinterval=2)
+        slide_c_fun(setsObjects[found_set_index].data['b'])
+        slideB.config(from_=setsObjects[found_set_index].data['a'], tickinterval=2)
+        slide_b_fun(setsObjects[found_set_index].data['a'])
     else:
         slideB.config(from_=0)
 
-    updateLegend(value)
-    updatePlots()
+    update_legend(value)
+    update_plots()
 
 
-def updateLegend(value):
+def update_legend(value):
     if value == "Triangle":
         Legend.set(
             "Triangle function:\nParameter a: point where triangle begins\n Parameter b: top of the "
@@ -188,47 +190,47 @@ def updateLegend(value):
 
 
 # Sliders functions
-def slideAfun(value):
+def slide_a_fun(value):
     PickedA.set(value)
-    foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    setsObjects[foundSetIndex].data['a'] = value
-    if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
+    found_set_index = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
+    setsObjects[found_set_index].data['a'] = value
+    if setsObjects[found_set_index].data['function'] != 'Gaussian':
         global slideB
         slideB.config(from_=value, tickinterval=2)
 
-    updatePlots()
+    update_plots()
 
 
-def slideBfun(value):
+def slide_b_fun(value):
     PickedB.set(value)
-    foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    setsObjects[foundSetIndex].data['b'] = value
-    if setsObjects[foundSetIndex].data['function'] != 'Gaussian':
+    found_set_index = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
+    setsObjects[found_set_index].data['b'] = value
+    if setsObjects[found_set_index].data['function'] != 'Gaussian':
         global slideC
         slideC.config(from_=value, tickinterval=2)
 
-    updatePlots()
+    update_plots()
 
 
-def slideCfun(value):
+def slide_c_fun(value):
     PickedC.set(value)
-    foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    setsObjects[foundSetIndex].data['c'] = value
-    if setsObjects[foundSetIndex].data['function'] == 'Trapeze':
+    found_set_index = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
+    setsObjects[found_set_index].data['c'] = value
+    if setsObjects[found_set_index].data['function'] == 'Trapeze':
         global slideD
         slideD.config(from_=value, tickinterval=2)
 
-    updatePlots()
+    update_plots()
 
 
-def slideDfun(value):
+def slide_d_fun(value):
     PickedD.set(value)
-    foundSetIndex = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
-    setsObjects[foundSetIndex].data['d'] = value
-    updatePlots()
+    found_set_index = next((i for i, x in enumerate(setsObjects) if x.data['name'] == PickedSetText.get()), None)
+    setsObjects[found_set_index].data['d'] = value
+    update_plots()
 
 
-def addSet():
+def add_set():
     global setsObjects
     global setsNames
     global setsDropdown
@@ -242,11 +244,11 @@ def addSet():
 
         setsDropdown['menu'].delete(0, 'end')
         for i in setsNames:
-            setsDropdown['menu'].add_command(label=i, command=lambda x=i: pickSet(x))
-        updatePlots()
+            setsDropdown['menu'].add_command(label=i, command=lambda x=i: pick_set(x))
+        update_plots()
 
 
-#algorithm functions and classes
+# algorithm functions and classes
 
 class Triangle:
     def __init__(self, name, start, peak, end, none=0):
@@ -304,22 +306,22 @@ class Gaussian:
 # 3 - what is target temperature (after 'AND')
 # 4 - what is the actions (after 'THEN')
 class Rule:
-    def __init__(self, fuzzySets, currentTable, target, then):
-        self.fuzzySets = fuzzySets
-        self.currentTable = currentTable
+    def __init__(self, fuzzy_sets, current_table, target, then):
+        self.fuzzySets = fuzzy_sets
+        self.currentTable = current_table
         self.target = target
         self.then = then
 
-    def __call__(self, currentTemp, targetTemp):
-        currentTempsMemberships = []
+    def __call__(self, current_temp, target_temp):
+        current_temps_memberships = []
         for fSet in self.currentTable:
-            foundSet = next((x for x in self.fuzzySets if x.name == fSet), None)
-            currentTempsMemberships.append(foundSet(currentTemp)['value'])
+            found_set = next((x for x in self.fuzzySets if x.name == fSet), None)
+            current_temps_memberships.append(found_set(current_temp)['value'])
 
-        foundSet = next((x for x in self.fuzzySets if x.name == self.target), None)
-        targetMembership = foundSet(targetTemp)['value']
+        found_set = next((x for x in self.fuzzySets if x.name == self.target), None)
+        target_membership = found_set(target_temp)['value']
 
-        result = min(max(currentTempsMemberships), targetMembership)
+        result = min(max(current_temps_memberships), target_membership)
         return {'action': self.then, 'membership': result}
 
     def __str__(self):
@@ -342,30 +344,31 @@ def import_sets_from_csv(filename):
     return sets
 
 
-def loadRules(filename, fuzzySets):
+def load_rules(filename, fuzzy_sets):
     rules = []
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
-            currentTempslist = list(row[0].split(";"))
-            rules.append(Rule(fuzzySets, currentTempslist, row[1], row[2]))
+            current_tempslist = list(row[0].split(";"))
+            rules.append(Rule(fuzzy_sets, current_tempslist, row[1], row[2]))
         return rules
 
 
-def rulesAggregation(rules, outputFuzzySets):
+def rules_aggregation(rules, output_fuzzy_sets):
     result = [0] * 200
-    for set in outputFuzzySets:
+    for out_set in output_fuzzy_sets:
         for i in range(200):
-            if set(i)['value'] > 0:
-                matches = [x['membership'] for x in rules if x['action'] == set.name and x['membership'] > 0]
+            if out_set(i)['value'] > 0:
+                matches = [x['membership'] for x in rules if x['action'] == out_set.name and x['membership'] > 0]
                 if len(matches) > 0:
-                    tmp = set(i)['value']
+                    tmp = out_set(i)['value']
                     if result[i] < min(max(matches), tmp):
-                     result[i] = min(max(matches), tmp)
+                        result[i] = min(max(matches), tmp)
     return result
 
-#defuzzification methods
-def calulcateCentroid(plot):
+
+# defuzzification methods
+def calulcate_centroid(plot):
     n = len(plot)
     x = list(range(n))
     num = 0
@@ -376,28 +379,26 @@ def calulcateCentroid(plot):
     return {'name': 'Centroid', 'value': num / denum}
 
 
-
-def maxMembershipPrinciple(plot):
+def max_membership_principle(plot):
     n = len(plot)
-    maxMem = 0
+    max_mem = 0
     x = list(range(n))
+    result = 0
     for i in range(n):
-        if plot[i] > maxMem:
-            maxMem = plot[i]
+        if plot[i] > max_mem:
+            max_mem = plot[i]
             result = x[i]
     return {'name': 'Max Membership Principle', 'value': result}
 
 
-
-def drawFinalPlot(outputFuzzySets, aggregatedRules, points):
-
-    plt.figure(figsize=(12,6))
+def draw_final_plot(output_fuzzy_sets, aggregated_rules, points):
+    plt.figure(figsize=(12, 6))
     plt.ylim(0, 1)
-    for x in outputFuzzySets:
+    for x in output_fuzzy_sets:
         plt.plot(np.linspace(0, 200, 200), [x(i)['value'] for i in range(0, 200)], '--', label=x.name, linewidth='0.5')
 
-    plt.fill_between(np.linspace(0, 200, 200), aggregatedRules)
-    plt.plot(np.linspace(0, 200, 200), aggregatedRules, label="Output membership", fillstyle='full')
+    plt.fill_between(np.linspace(0, 200, 200), aggregated_rules)
+    plt.plot(np.linspace(0, 200, 200), aggregated_rules, label="Output membership", fillstyle='full')
     for point in points:
         plt.axvline(x=point['value'], label=f'{point["name"]}: {point["value"]}', color='black')
 
@@ -406,7 +407,7 @@ def drawFinalPlot(outputFuzzySets, aggregatedRules, points):
     plt.show()
 
 
-def importInputSets():
+def import_input_sets():
     global input_sets
     root.filename = filedialog.askopenfilename(initialdir=os.getcwd(),
                                                title="Select .CSV file",
@@ -416,7 +417,7 @@ def importInputSets():
                         "\nNumber of imported sets: " + str(len(input_sets)))
 
 
-def importOutputSets():
+def import_output_sets():
     global output_sets
     root.filename = filedialog.askopenfilename(initialdir=os.getcwd(),
                                                title="Select .CSV file",
@@ -426,18 +427,19 @@ def importOutputSets():
                         "\nNumber of imported sets: " + str(len(output_sets)))
 
 
-def importRulesFromCSV():
+def import_rules_from_csv():
     global rules
     root.filename = filedialog.askopenfilename(initialdir=os.getcwd(),
                                                title="Select .CSV file",
                                                filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
-    rules = loadRules(root.filename, input_sets)
+    rules = load_rules(root.filename, input_sets)
     messagebox.showinfo("Import successful", "Imported file: " + root.filename +
                         "\nNumber of imported rules: " + str(len(rules)))
 
 
 def run():
-    if currentTemp.get() != '' and targetTemp.get() != "" and len(input_sets) > 0 and len(output_sets) > 0 and len(rules) > 0:
+    if currentTemp.get() != '' and targetTemp.get() != "" and len(input_sets) > 0 and len(output_sets) > 0 and len(
+            rules) > 0:
         global temp1, temp2
         temp1 = int(currentTemp.get())
         temp2 = int(targetTemp.get())
@@ -449,23 +451,22 @@ def run():
         print(current)
         print(target)
 
-        evaluatedRules = [x(temp1, temp2) for x in rules]
-        for x in evaluatedRules:
+        evaluated_rules = [x(temp1, temp2) for x in rules]
+        for x in evaluated_rules:
             print(x)
 
-        aggregatedRules = rulesAggregation(evaluatedRules, output_sets)
-        centroid = calulcateCentroid(aggregatedRules)
-        maxMembershipPrincipleResult = maxMembershipPrinciple(aggregatedRules)
+        aggregated_rules = rules_aggregation(evaluated_rules, output_sets)
+        centroid = calulcate_centroid(aggregated_rules)
+        max_membership_principle_result = max_membership_principle(aggregated_rules)
 
-        drawFinalPlot(output_sets, aggregatedRules, [centroid, maxMembershipPrincipleResult])
+        draw_final_plot(output_sets, aggregated_rules, [centroid, max_membership_principle_result])
     else:
         messagebox.showerror("Error", "You did not provided valid data!")
 
 
-
-def printS():
+def print_s():
     for x in input_sets:
-       print(x)
+        print(x)
 
     for x in output_sets:
         print(x)
@@ -473,14 +474,15 @@ def printS():
     for x in rules:
         print(x)
 
+
 # dropDowns
 setsNames = list(map(lambda x: x.data['name'], setsObjects))
 
-setsDropdown = OptionMenu(root, clickedSet, *setsNames, command=pickSet)
+setsDropdown = OptionMenu(root, clickedSet, *setsNames, command=pick_set)
 setsDropdown.config(width=30)
 setsDropdown.grid(row=1, column=0, padx=20, pady=20, columnspan=2)
 
-functionsDropdown = OptionMenu(root, clickedFunction, *functions, command=pickFun)
+functionsDropdown = OptionMenu(root, clickedFunction, *functions, command=pick_fun)
 functionsDropdown.config(width=30)
 functionsDropdown.grid(row=2, column=0, padx=20, pady=20, columnspan=2)
 
@@ -490,23 +492,23 @@ setsNamesList = list(setsNames)
 for i in list(setsNames):
     setsListbox.insert(END, i)
 
-btnUpdate = Button(root, command=updatePlots, text="Update")
+btnUpdate = Button(root, command=update_plots, text="Update")
 btnUpdate.grid(row=7, column=6, columnspan=3)
 
 # sliders
-slideA = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideAfun)
+slideA = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slide_a_fun)
 slideA.config(length=300, tickinterval=5)
 slideA.grid(row=3, column=0, padx=20, columnspan=2)
 
-slideB = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideBfun)
+slideB = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slide_b_fun)
 slideB.config(length=300, tickinterval=5)
 slideB.grid(row=5, column=0, padx=20, columnspan=2)
 
-slideC = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideCfun)
+slideC = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slide_c_fun)
 slideC.config(length=300, tickinterval=5)
 slideC.grid(row=7, column=0, padx=20, columnspan=2)
 
-slideD = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slideDfun)
+slideD = Scale(root, from_=-20, to=50, orient=HORIZONTAL, command=slide_d_fun)
 slideD.config(length=300, tickinterval=5)
 slideD.grid(row=9, column=0, padx=20, columnspan=2)
 
@@ -546,26 +548,26 @@ legendLabel.grid(row=11, column=3, columnspan=5, rowspan=6)
 btnExport = Button(root, command=export, text="Export to .CSV")
 btnExport.grid(row=16, column=0)
 
-btnImport = Button(root, command=importCSV, text="Import from .CSV")
+btnImport = Button(root, command=import_csv, text="Import from .CSV")
 btnImport.grid(row=16, column=1)
 
 addEntry = Entry(root)
 addEntry.grid(row=2, column=6, columnspan=3)
 
-btnAdd = Button(root, command=addSet, text="Add")
+btnAdd = Button(root, command=add_set, text="Add")
 btnAdd.grid(row=2, column=6, columnspan=3, sticky=E)
 
 fig = Figure(figsize=(14, 8), dpi=200)
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
 canvas.get_tk_widget().grid(row=0, column=5, rowspan=15, columnspan=5)
-pickSet(setsObjects[1].data['name'])
-pickFun(functions[0])
+pick_set(setsObjects[1].data['name'])
+pick_fun(functions[0])
 
-#algorithm frame
-algorithm_frame = Frame(root,relief='flat', borderwidth=30)
+# algorithm frame
+algorithm_frame = Frame(root, relief='flat', borderwidth=30)
 algorithm_frame.grid(row=18, column=0, columnspan=10)
-algorithm_frame.config( pady=30, padx=20)
+algorithm_frame.config(pady=30, padx=20)
 
 currentTempLabel = Label(algorithm_frame, text="Current Temperature")
 currentTempLabel.grid(row=0, column=0, columnspan=2)
@@ -577,17 +579,17 @@ targetTempLabel.grid(row=0, column=2, columnspan=2)
 targetTemp = Entry(algorithm_frame)
 targetTemp.grid(row=1, column=2, columnspan=2)
 
-btnImportInput = Button(algorithm_frame, command=importInputSets, text="Pick input fuzzy sets file")
+btnImportInput = Button(algorithm_frame, command=import_input_sets, text="Pick input fuzzy sets file")
 btnImportInput.grid(row=1, column=4, padx=5)
 
-btnImportOutput = Button(algorithm_frame, command=importOutputSets, text="Pick output fuzzy sets file")
+btnImportOutput = Button(algorithm_frame, command=import_output_sets, text="Pick output fuzzy sets file")
 btnImportOutput.grid(row=1, column=5, padx=5)
 
-btnImportRules = Button(algorithm_frame, command=importRulesFromCSV, text="Pick rules file")
+btnImportRules = Button(algorithm_frame, command=import_rules_from_csv, text="Pick rules file")
 btnImportRules.grid(row=1, column=6, padx=5)
 
 btnRun = Button(algorithm_frame, command=run, text="Run Algorithm", bg='yellow')
 btnRun.grid(row=1, column=8, padx=5)
 
-updatePlots()
+update_plots()
 root.mainloop()
