@@ -170,7 +170,7 @@ def test_functions():
     hot = Gaussian("HOT", 22, 5)
     very_hot = Trapezoid("VERY HOT", 25, 30, 50, 50)
     classesB = [very_cold, cold, warm, hot, very_hot]
-    classes = import_sets_from_csv("inputSets.csv")
+    classes = import_sets_from_csv("inputSetsAdjusted.csv")
 
 #fuzzy sets for output
     cool = Triangle("COOL", 0, 50, 100)
@@ -181,26 +181,53 @@ def test_functions():
 
     rules = loadRules("rules.csv", classes)
 
-    for x in rules:
-        print(x)
+    #for x in rules:
+    #    print(x)
 
-    temp1 = 18
-    temp2 = 22
+    temp = 32.0
+    temp_target = 2.0
 
-    current = [x(temp1) for x in classes]
-    target = [x(temp2) for x in classes]
+    current = [x(temp) for x in classes]
+    target = [x(temp_target) for x in classes]
 
     print(current)
     print(target)
 
-    evaluatedRules = [x(temp1, temp2) for x in rules]
+    evaluatedRules = [x(temp, temp_target) for x in rules]
 
 
     aggregatedRules = rulesAggregation(evaluatedRules, outputFuzzySets)
     centroid = calulcateCentroid(aggregatedRules)
     maxMembershipPrincipleResult = maxMembershipPrinciple(aggregatedRules)
 
+    #print(f"Target: {temp_target} | Current: {temp} - Centroid: {centroid['value'].round(2)} - MMP: {maxMembershipPrincipleResult['value']}")
+
     drawFinalPlot(outputFuzzySets, aggregatedRules, [centroid, maxMembershipPrincipleResult])
+
+
+def temperature_simulation(start, target, timesteps, input_sets, output_sets, rules_set, method):
+    input_sets = import_sets_from_csv(input_sets)
+
+    output_sets = import_sets_from_csv(output_sets)
+
+    rules = loadRules(rules_set, input_sets)
+
+    for _ in range(0, timesteps):
+        target = [x(target) for x in input_sets]
+
+        evaluated_rules = [x(start, target) for x in rules]
+
+        output = _
+
+        aggregated_rules = rulesAggregation(evaluated_rules, output_sets)
+        if method is "centroid":
+            output = calulcateCentroid(aggregated_rules)
+        if method is "mmp":
+            output = maxMembershipPrinciple(aggregated_rules)
+
+        start += ((output['value']-100)*2)/1000
+
+        print(round(start, 2))
 
 
 test_functions()
